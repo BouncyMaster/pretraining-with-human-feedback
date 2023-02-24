@@ -111,21 +111,6 @@ class CustomObjectiveTrainer(Trainer):
         self.state.log_history.append({k: v for k, v in output.items() if isinstance(v, (int, float))})
         self.control = self.callback_handler.on_log(self.args, self.state, self.control, output)
 
-    def get_train_dataloader(self) -> DataLoader:
-        if isinstance(self.train_dataset, torch.utils.data.IterableDataset) and self.args.world_size == 1:
-            # fix for DP with multiple GPUs
-            print(f'Setting train_dataloader.batch_size={self.args.train_batch_size}')
-            return DataLoader(
-                self._remove_unused_columns(self.train_dataset, description="training"),
-                collate_fn=self.data_collator,
-                batch_size=self.args.train_batch_size,
-                num_workers=0,
-                pin_memory=self.args.dataloader_pin_memory,
-                shuffle=True,
-            )
-        else:
-            return super().get_train_dataloader()
-
     def _push_from_checkpoint(self, checkpoint_folder: str) -> None:
         super()._push_from_checkpoint(checkpoint_folder)
         self.repo.add_tag(tag_name=str(self.state.tokens_seen))
