@@ -121,7 +121,6 @@ class CustomObjectiveTrainer(Trainer):
                 batch_size=self.args.train_batch_size,
                 num_workers=0,
                 pin_memory=self.args.dataloader_pin_memory,
-                shuffle=True,
             )
         else:
             return super().get_train_dataloader()
